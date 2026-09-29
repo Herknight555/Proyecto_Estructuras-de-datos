@@ -1,92 +1,162 @@
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-
-public class Main {
+ 
+public class Main
+   
+    {
+    public static void main(String[] args) 
+        {
+        
+        Scanner input = new Scanner(System.in);
+        int AUXILIAR = 1;
+        int seleccion;
+        int x;
+        int size = 0;
+        int minimo = 1;
+        int maximo = 1000000;
+        String desc = "";
+        
+        do
+            {
+            if(AUXILIAR == 1) //menu de datos de prueba
+                {
+                System.out.print("\n\tSELECCIONA LOS DATOS DE PRUEBA\n"
+                + "1. 100 ELEMENTOS ALEATORIOS\n" //los aleatorios van en aux 2
+                + "2. 50,000 ELEMENTOS ALEATORIOS\n" 
+                + "3. 100,000 ELEMENTOS ALEATORIOS\n"
+                + "4. 100,000 ELEMENTOS ENTRE 1 Y 5\n"
+                + "5. INGRESAR LA CANTIDAD DE ELEMENTOS\n" //auxiliar 3
+                + "6. SALIR\n" //auxiliar 0
+                + "\n -  ");
+                
+                try
+                    {
+                    seleccion = input.nextInt();
+                    input.nextLine();
+                    }
+                catch(InputMismatchException e)
+                    {
+                    System.out.println("\nERROR. Escribir un número.\n");
+                    input.nextLine();
+                    seleccion = 0;
+                    }
+                
+                switch(seleccion)
+                    {
+                    case 1:
+                        size = 100;
+                        minimo = 1;
+                        maximo = 1000000;
+                        desc = "100 elementos aleatorios";
+                        AUXILIAR = 2;
+                        break;
+                        
+                    case 2:
+                        size = 50000;
+                        minimo = 1;
+                        maximo = 1000000;
+                        desc = "50,000 elementos aleatorios";
+                        AUXILIAR = 2;
+                        break;
+                        
+                    case 3:
+                        size = 100000;
+                        minimo = 1;
+                        maximo = 1000000;
+                        desc = "100,000 elementos aleatorios";
+                        AUXILIAR = 2;
+                        break;
+                        
+                    case 4:
+                        size = 100000;
+                        minimo = 1;
+                        maximo = 5;
+                        desc = "100,000 elementos entre 1 y 5";
+                        AUXILIAR = 2;
+                        break;
+                        
+                    case 5:
+                        AUXILIAR = 3;
+                        break;
+                        
+                    case 6:
+                        AUXILIAR = 0;
+                        break;
+                        
+                    case 0:
+                        break;
+                        
+                    default:
+                        System.out.println("\nSelecciona una opción entre 1 y 6.\n");
+                        break;
+                    }
+                
+                }
+            else if(AUXILIAR == 2) //ejecutar ordenamientos
+                {
+                System.out.println("\nGenerando datos:  " + desc + "...");
+                int[] DATOS = Datos.generar(size, minimo, maximo);
+                
+                List<Ejecutor.Resultado> RESULTADOS = new Ejecutor().ejecutar(DATOS);
+                
+                ArrayList<Ejecutor.Resultado> ordenados = new ArrayList<>(RESULTADOS);
+                ordenados.sort(Comparator.comparingDouble(Ejecutor.Resultado::milisegundos));
+                
+                System.out.println("\n\tRESULTADOS DE ORDENAMIENTO\n"
+                        + "Prueba: " + desc + "\n"
+                        + "Elementos: " + size + "\n");
+                System.out.printf("%-4s %-10s %-12s %-14s %-10s %s%n", "Pos.", "Algoritmo", "Estructura", "Tiempo (ms)", "¿Ordenó?", "Complejidad");
+                
+                for(int i = 0; i < ordenados.size(); i++)
+                    {
+                    Ejecutor.Resultado actual = ordenados.get(i);
+                        System.out.printf("%-4d %-10s %-12s %-14.3f %-10s %s%n", i + 1, actual.algoritmo(), actual.estructura(),
+                            actual.milisegundos(), actual.ordenado() ? "Sí" : "No", actual.complejidad());
+                    }
+                
+                Ejecutor.Resultado MASRAPIDO = ordenados.get(0);
+                System.out.println("\nMenor tiempo registrado: " + MASRAPIDO.algoritmo() + " (" + MASRAPIDO.estructura() + ")");
+                
+                Grafica.mostrar(desc, RESULTADOS);
+                
+                AUXILIAR = 1;
+                }
+            else if(AUXILIAR == 3) //cantidad personalizada
+                {
+                System.out.print("\n¿Cuántos elementos vas a ordenar? \n\t");
+                
+                try
+                    {
+                    x = input.nextInt();
+                    input.nextLine();
+                    if(x > 0)
+                        {
+                        size = x;
+                        minimo = 1;
+                        maximo = 1000000;
+                        desc = size + " elementos aleatorios";
+                        AUXILIAR = 2;
+                        }
+                    else
+                        {
+                        System.out.println("\nERROR. Ingresa un número mayor que 0.\n");
+                        }
+                    }
+                catch(InputMismatchException e)
+                    {
+                    System.out.println("\nERROR. Escribir un número entero.\n");
+                    input.nextLine();
+                    }
+                
+                }
+            }
+        while(AUXILIAR != 0);
+        
+        input.close();
+        
+        }
     
-    public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            int option = leerEscenario(scanner);
-
-            int size;
-            String description;
-            int[] originalData;
-
-            if (option == 5) {
-                size = leerCantidadElementos(scanner);
-                description = size + " elementos aleatorios";
-                originalData = Datos.generar(size);
-            } else {
-                size = switch (option) {
-                    case 1 -> 100;
-                    case 2 -> 50_000;
-                    case 3, 4 -> 100_000;
-                    default -> throw new IllegalStateException("Opción no válida.");
-                };
-                description = switch (option) {
-                    case 1 -> "100 elementos aleatorios";
-                    case 2 -> "50,000 elementos aleatorios";
-                    case 3 -> "100,000 elementos aleatorios";
-                    case 4 -> "100,000 elementos entre 1 y 5";
-                    default -> "";
-                };
-                originalData = option == 4 ? Datos.generar(size, 1, 5) : Datos.generar(size);
-            }
-
-            System.out.println("\nGenerando datos: " + description + "...");
-            List<Ejecutor.Resultado> results = new Ejecutor().ejecutar(originalData);
-            mostrarResultados(description, size, results);
-            Grafica.mostrar(description, results);
-        }
     }
-
-    private static int leerEscenario(Scanner scanner) {
-        while (true) {
-            System.out.println("\nSELECCIONA LOS DATOS DE PRUEBA");
-            System.out.println("1. 100 elementos aleatorios");
-            System.out.println("2. 50,000 elementos aleatorios");
-            System.out.println("3. 100,000 elementos aleatorios");
-            System.out.println("4. 100,000 elementos con valores entre 1 y 5");
-            System.out.println("5. Ingresar la cantidad de elementos");
-            System.out.print("Opción: ");
-            if (scanner.hasNextInt()) {
-                int option = scanner.nextInt();
-                if (option >= 1 && option <= 5) return option;
-            } else {
-                scanner.next();
-            }
-            System.out.println("Selecciona una opción entre 1 y 5.");
-        }
-    }
-
-    private static int leerCantidadElementos(Scanner scanner) {
-        while (true) {
-            System.out.print("\n¿Cuántos elementos vas a ordenar? ");
-            if (scanner.hasNextInt()) {
-                int cantidad = scanner.nextInt();
-                if (cantidad > 0) return cantidad;
-                System.out.println("Ingresa un número entero positivo (mayor que 0).");
-            } else {
-                System.out.println("Entrada inválida. Ingresa un número entero positivo.");
-                scanner.next();
-            }
-        }
-    }
-
-    private static void mostrarResultados(String description, int size, List<Ejecutor.Resultado> results) {
-        List<Ejecutor.Resultado> ordered = results.stream()
-                .sorted(Comparator.comparingDouble(Ejecutor.Resultado::milliseconds))
-                .toList();
-        System.out.println("\nRESULTADOS DE ORDENAMIENTO");
-        System.out.println("Prueba: " + description);
-        System.out.println("Elementos: " + size);
-        System.out.printf("%-4s %-16s %-12s %-14s %-10s Complejidad%n", "Pos.", "Algoritmo", "Estructura", "Tiempo (ms)", "¿Ordenó?");
-        for (int index = 0; index < ordered.size(); index++) {
-            Ejecutor.Resultado result = ordered.get(index);
-            System.out.printf("%-4d %-16s %-12s %-14.3f %-10s %s%n", index + 1, result.algorithm(), result.structure(),
-                    result.milliseconds(), result.sorted() ? "Sí" : "No", result.complexity());
-        }
-        Ejecutor.Resultado fastest = ordered.get(0);
-        System.out.printf("%nImplementación con menor tiempo registrado: %s (%s)%n", fastest.algorithm(), fastest.structure());
-    }
-}

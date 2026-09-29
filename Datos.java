@@ -1,19 +1,27 @@
+
 import java.util.Random;
-
-public class Datos {
-    private static final int DatoMinimo = 1;
-    private static final int DatoMaximo = 1000000;
-
-    public static int[] generar(int size) {
-        return generar(size, DatoMinimo, DatoMaximo);
-    }
-
-    public static int[] generar(int size, int minimum, int maximum) {
-        Random random = new Random();
-        int[] values = new int[size];
-        for (int index = 0; index < size; index++) {
-            values[index] = random.nextInt(maximum - minimum + 1) + minimum;
+ 
+public class Datos
+    {
+    private static final int MIN = 1;
+    private static final int MAX = 1000000;
+    
+    public static int[] generar(int s) 
+        {
+        return generar(s, MIN, MAX);
         }
-        return values;
+    
+    public static int[] generar(int s, int m, int M) 
+        {
+        Random random = new Random();
+        int[] ARREGLO = new int[s];
+        
+        for(int i = 0; i < s; i++)
+            {
+            ARREGLO[i] = random.nextInt(M - m + 1) + m;
+            }
+        
+        return ARREGLO;
+        }
+    
     }
-}

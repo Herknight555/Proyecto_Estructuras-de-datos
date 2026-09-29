@@ -5,73 +5,74 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class Ejecutor {
-    private ConcurrentHashMap<Integer, Resultado> results = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<Integer, Resultado> resultados = new ConcurrentHashMap<>();
 
-    public record Resultado(String algorithm, String structure,
-                            String complexity, double milliseconds, boolean sorted) {
+    public record Resultado(String algoritmo, String estructura,
+                            String complejidad, double milisegundos, boolean ordenado) {
     }
 
-    public List<Resultado> ejecutar(int[] originalData) {
-        List<Thread> threads = new ArrayList<>();
-        List<AlgorithmDefinition> definitions = definitions();
+    public List<Resultado> ejecutar(int[] datosOriginales) {
+        List<Thread> hilos = new ArrayList<>();
+        List<DefinicionAlgoritmo> definiciones = obtenerDefiniciones();
 
-        for (int index = 0; index < definitions.size(); index++) {
-            AlgorithmDefinition definition = definitions.get(index);
-            Thread thread = new Thread(() -> execute(definition, originalData), definition.algorithm + "-" + definition.structure);
-            threads.add(thread);
-            thread.start();
+        for (int indice = 0; indice < definiciones.size(); indice++) {
+            DefinicionAlgoritmo definicion = definiciones.get(indice);
+            Thread hilo = new Thread(() -> ejecutarAlgoritmo(definicion, datosOriginales),
+                    definicion.algoritmo + "-" + definicion.estructura);
+            hilos.add(hilo);
+            hilo.start();
         }
 
-        for (Thread thread : threads) {
+        for (Thread hilo : hilos) {
             try {
-                thread.join();
+                hilo.join();
             } catch (InterruptedException exception) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException("La espera de los hilos fue interrumpida.", exception);
             }
         }
 
-        return results.entrySet().stream()
+        return resultados.entrySet().stream()
                 .sorted(java.util.Map.Entry.comparingByKey())
                 .map(java.util.Map.Entry::getValue)
                 .toList();
     }
 
-    private void execute(AlgorithmDefinition definition, int[] originalData) {
-        long start;
-        long elapsed;
-        boolean sorted;
+    private void ejecutarAlgoritmo(DefinicionAlgoritmo definicion, int[] datosOriginales) {
+        long inicio;
+        long tiempoTranscurrido;
+        boolean ordenado;
 
-        if (definition.arraySorter != null) {
-            int[] copy = Arrays.copyOf(originalData, originalData.length);
-            start = System.nanoTime();
-            definition.arraySorter.accept(copy);
-            elapsed = System.nanoTime() - start;
-            sorted = isSorted(copy);
+        if (definicion.ordenadorArreglo != null) {
+            int[] copia = Arrays.copyOf(datosOriginales, datosOriginales.length);
+            inicio = System.nanoTime();
+            definicion.ordenadorArreglo.accept(copia);
+            tiempoTranscurrido = System.nanoTime() - inicio;
+            ordenado = estaOrdenado(copia);
         } else {
-            ArrayList<Integer> copy = new ArrayList<>(originalData.length);
-            for (int value : originalData) copy.add(value);
-            start = System.nanoTime();
-            definition.listSorter.accept(copy);
-            elapsed = System.nanoTime() - start;
-            sorted = isSorted(copy);
+            ArrayList<Integer> copia = new ArrayList<>(datosOriginales.length);
+            for (int valor : datosOriginales) copia.add(valor);
+            inicio = System.nanoTime();
+            definicion.ordenadorLista.accept(copia);
+            tiempoTranscurrido = System.nanoTime() - inicio;
+            ordenado = estaOrdenado(copia);
         }
 
-        results.put(definition.order, new Resultado(definition.algorithm, definition.structure,
-                definition.complexity, elapsed / 1_000_000.0, sorted));
+        resultados.put(definicion.orden, new Resultado(definicion.algoritmo, definicion.estructura,
+                definicion.complejidad, tiempoTranscurrido / 1_000_000.0, ordenado));
     }
 
-    private static boolean isSorted(int[] values) {
-        for (int index = 1; index < values.length; index++) if (values[index - 1] > values[index]) return false;
+    private static boolean estaOrdenado(int[] valores) {
+        for (int indice = 1; indice < valores.length; indice++) if (valores[indice - 1] > valores[indice]) return false;
         return true;
     }
 
-    private static boolean isSorted(ArrayList<Integer> values) {
-        for (int index = 1; index < values.size(); index++) if (values.get(index - 1) > values.get(index)) return false;
+    private static boolean estaOrdenado(ArrayList<Integer> valores) {
+        for (int indice = 1; indice < valores.size(); indice++) if (valores.get(indice - 1) > valores.get(indice)) return false;
         return true;
     }
 
-    private static List<AlgorithmDefinition> definitions() {
+    private static List<DefinicionAlgoritmo> obtenerDefiniciones() {
         return List.of(
                 definicion(1, "bubble", "O(n) / O(n^2)", Ordenamientos::bubble, null, "Arreglo"),
                 definicion(2, "bubble", "O(n) / O(n^2)", null, Ordenamientos::bubble, "ArrayList"),
@@ -88,14 +89,14 @@ public class Ejecutor {
         );
     }
 
-    private static AlgorithmDefinition definicion(int order, String algorithm, String complexity,
-                                                   Consumer<int[]> arraySorter, Consumer<ArrayList<Integer>> listSorter,
-                                                   String structure) {
-        return new AlgorithmDefinition(order, algorithm, complexity, arraySorter, listSorter, structure);
+    private static DefinicionAlgoritmo definicion(int orden, String algoritmo, String complejidad,
+                                                   Consumer<int[]> ordenadorArreglo, Consumer<ArrayList<Integer>> ordenadorLista,
+                                                   String estructura) {
+        return new DefinicionAlgoritmo(orden, algoritmo, complejidad, ordenadorArreglo, ordenadorLista, estructura);
     }
 
-    private record AlgorithmDefinition(int order, String algorithm, String complexity,
-                                       Consumer<int[]> arraySorter, Consumer<ArrayList<Integer>> listSorter,
-                                       String structure) {
+    private record DefinicionAlgoritmo(int orden, String algoritmo, String complejidad,
+                                       Consumer<int[]> ordenadorArreglo, Consumer<ArrayList<Integer>> ordenadorLista,
+                                       String estructura) {
     }
 }
