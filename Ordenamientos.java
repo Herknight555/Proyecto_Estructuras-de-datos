@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public final class Ordenamientos {
+public class Ordenamientos {
     private Ordenamientos() {
     }
 

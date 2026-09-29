@@ -10,7 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public final class Grafica {
+public class Grafica {
     private Grafica() {
     }
     
@@ -25,7 +25,7 @@ public final class Grafica {
         });
     }
 
-    private static final class BarChartPanel extends JPanel {
+    private static class BarChartPanel extends JPanel {
         private static final int LEFT_MARGIN = 230;
         private static final int RIGHT_MARGIN = 80;
         private static final int TOP_MARGIN = 70;

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
-public final class Ejecutor {
-    private final ConcurrentHashMap<Integer, Resultado> results = new ConcurrentHashMap<>();
+public class Ejecutor {
+    private ConcurrentHashMap<Integer, Resultado> results = new ConcurrentHashMap<>();
 
     public record Resultado(String algorithm, String structure,
                             String complexity, double milliseconds, boolean sorted) {

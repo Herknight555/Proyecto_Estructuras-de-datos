@@ -1,14 +1,11 @@
 import java.util.Random;
 
-public final class Datos {
-    private static final int MIN_VALUE = 1;
-    private static final int MAX_VALUE = 1_000_000;
-
-    private Datos() {
-    }
+public class Datos {
+    private static final int DatoMinimo = 1;
+    private static final int DatoMaximo = 1000000;
 
     public static int[] generar(int size) {
-        return generar(size, MIN_VALUE, MAX_VALUE);
+        return generar(size, DatoMinimo, DatoMaximo);
     }
 
     public static int[] generar(int size, int minimum, int maximum) {
